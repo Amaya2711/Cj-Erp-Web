@@ -1,19 +1,15 @@
-import MainLayout from "../layouts/MainLayout";
-
 export default function UsuariosPage() {
   return (
-    <MainLayout>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Usuarios</h1>
-        <p style={styles.text}>
-          Aquí irá el mantenimiento de usuarios del ERP.
-        </p>
+    <div style={styles.card}>
+      <h1 style={styles.title}>Usuarios</h1>
+      <p style={styles.text}>
+        Aquí irá el mantenimiento de usuarios del ERP.
+      </p>
 
-        <div style={styles.box}>
-          <p><strong>Próximo paso:</strong> listar usuarios desde el backend.</p>
-        </div>
+      <div style={styles.box}>
+        <p><strong>Próximo paso:</strong> listar usuarios desde el backend.</p>
       </div>
-    </MainLayout>
+    </div>
   );
 }
 

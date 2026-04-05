@@ -1,11 +1,27 @@
 import httpClient from "../../../api/httpClient";
 
-export async function login(request: any) {
-  const response = await httpClient.post("/Auth/login", request);
-  return response.data;
+export interface LoginRequest {
+  idUsuario: string;
+  clave: string;
 }
 
-export async function getCurrentUser() {
-  const response = await httpClient.get("/auth/me");
-  return response.data;
+export interface LoginData {
+  token: string;
+  idUsuario: string;
+  nombreEmpleado?: string;
+  correo?: string;
+  codEmp?: string | number | null;
+  codVal?: string | number | null;
+  cuadrilla?: string | number | null;
+  expiration?: string;
+}
+
+export interface LoginResponse {
+  message: string;
+  data: LoginData;
+}
+
+export async function login(payload: LoginRequest): Promise<LoginResponse> {
+  const { data } = await httpClient.post<LoginResponse>("/auth/login", payload);
+  return data;
 }

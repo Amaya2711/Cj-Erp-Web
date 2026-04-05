@@ -1,17 +1,36 @@
 import axios from "axios";
+import { getAuthUser, clearAuthUser } from "../utils/authStorage";
 
 const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
 });
 
 httpClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
+  const requestUrl = config.url?.toLowerCase() ?? "";
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  // En login no enviar token
+  if (requestUrl.includes("/auth/login")) {
+    return config;
+  }
+
+  const authUser = getAuthUser();
+
+  if (authUser?.token) {
+    config.headers.Authorization = `Bearer ${authUser.token}`;
   }
 
   return config;
 });
+
+httpClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      clearAuthUser();
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default httpClient;

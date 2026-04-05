@@ -1,15 +1,11 @@
-import MainLayout from "../layouts/MainLayout";
-
 export default function ConfiguracionPage() {
   return (
-    <MainLayout>
-      <div style={styles.card}>
-        <h1 style={styles.title}>Configuración</h1>
-        <p style={styles.text}>
-          Aquí irán parámetros generales, roles, permisos y opciones del sistema.
-        </p>
-      </div>
-    </MainLayout>
+    <div style={styles.card}>
+      <h1 style={styles.title}>Configuración</h1>
+      <p style={styles.text}>
+        Aquí irán parámetros generales, roles, permisos y opciones del sistema.
+      </p>
+    </div>
   );
 }
 
