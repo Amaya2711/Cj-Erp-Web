@@ -97,6 +97,25 @@ public class SegMenuService : ISegMenuService
                     CodigoMenu = null
                 };
             }
+            else if (row.IdMenuNivel2.HasValue && row.IdMenuNivel2.Value > 0 && menuMap.TryGetValue(row.IdMenuNivel2.Value, out var menuNivel2Existente))
+            {
+                // Do not overwrite a deeper node label already resolved with route information.
+                var hasResolvedRoute = !string.IsNullOrWhiteSpace(menuNivel2Existente.Ruta);
+
+                if (!hasResolvedRoute && string.IsNullOrWhiteSpace(menuNivel2Existente.NombreMenu) && !string.IsNullOrWhiteSpace(row.MenuNivel2))
+                {
+                    menuNivel2Existente.NombreMenu = row.MenuNivel2;
+                }
+
+                menuNivel2Existente.IdMenuPadre ??= row.IdMenuNivel1;
+                menuNivel2Existente.Icono ??= row.IconoNivel2;
+                menuNivel2Existente.OrdenMenu = row.OrdenNivel2 ?? menuNivel2Existente.OrdenMenu;
+
+                if (!hasResolvedRoute)
+                {
+                    menuNivel2Existente.NivelMenu = Math.Min(menuNivel2Existente.NivelMenu, 1);
+                }
+            }
 
             if (row.IdMenuNivel3.HasValue && row.IdMenuNivel3.Value > 0 && !menuMap.ContainsKey(row.IdMenuNivel3.Value))
             {
@@ -113,6 +132,26 @@ public class SegMenuService : ISegMenuService
                     NivelMenu = row.IdMenuNivel2.HasValue ? 2 : 1,
                     CodigoMenu = null
                 };
+            }
+            else if (row.IdMenuNivel3.HasValue && row.IdMenuNivel3.Value > 0 && menuMap.TryGetValue(row.IdMenuNivel3.Value, out var menuNivel3Existente))
+            {
+                var parentId = row.IdMenuNivel2 ?? row.IdMenuNivel1;
+
+                // Prioritize level-3 values from the dynamic SP when IdMenu is duplicated across levels.
+                if (!string.IsNullOrWhiteSpace(row.MenuNivel3))
+                {
+                    menuNivel3Existente.NombreMenu = row.MenuNivel3;
+                }
+
+                if (!string.IsNullOrWhiteSpace(row.RutaNivel3))
+                {
+                    menuNivel3Existente.Ruta = row.RutaNivel3;
+                }
+
+                menuNivel3Existente.IdMenuPadre = parentId;
+                menuNivel3Existente.Icono = row.IconoNivel3 ?? menuNivel3Existente.Icono;
+                menuNivel3Existente.OrdenMenu = row.OrdenNivel3 ?? menuNivel3Existente.OrdenMenu;
+                menuNivel3Existente.NivelMenu = row.IdMenuNivel2.HasValue ? 2 : 1;
             }
         }
 

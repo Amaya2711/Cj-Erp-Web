@@ -11,6 +11,7 @@ export interface DashboardGroup {
   color: string;
   tiles: DashboardTile[];
   codigoMenu?: string;
+  ordenMenu?: number;
 }
 
 /**
@@ -20,6 +21,8 @@ export interface DashboardTile {
   label: string;
   path: string;
   badge?: string;
+  ordenMenu?: number;
+  children?: DashboardTile[];
 }
 
 /**
@@ -51,46 +54,103 @@ export function transformMenusToDashboard(menus: MenuDto[]): DashboardGroup[] {
     }
   });
 
+  const getSortedChildren = (parentId: number | string): MenuDto[] => {
+    return [...(moduleMap.get(parentId) || [])].sort((a, b) => {
+      const orderA = a.ordenMenu || 0;
+      const orderB = b.ordenMenu || 0;
+      if (orderA !== orderB) {
+        return orderA - orderB;
+      }
+
+      return a.idMenu - b.idMenu;
+    });
+  };
+
+  const findFirstRouteDescendant = (parentId: number | string): string | null => {
+    const children = getSortedChildren(parentId);
+
+    for (const child of children) {
+      if (child.ruta) {
+        return child.ruta;
+      }
+
+      const nestedRoute = findFirstRouteDescendant(child.idMenu);
+      if (nestedRoute) {
+        return nestedRoute;
+      }
+    }
+
+    return null;
+  };
+
+  const buildTileChildren = (parentId: number | string): DashboardTile[] => {
+    return getSortedChildren(parentId)
+      .map((child) => ({
+        label: child.nombreMenu.trim(),
+        path: child.ruta || findFirstRouteDescendant(child.idMenu) || "#",
+        badge: child.nombreMenu.charAt(0).toUpperCase(),
+        ordenMenu: child.ordenMenu ?? 0,
+      }))
+      .filter((tile) => tile.path !== "#")
+      .sort((a, b) => {
+        const orderA = a.ordenMenu ?? 0;
+        const orderB = b.ordenMenu ?? 0;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
+      });
+  };
+
   // Build dashboard groups from categories
   const groups: DashboardGroup[] = [];
 
   categoryMap.forEach((category) => {
-    const categoryModules = moduleMap.get(category.idMenu) || [];
+    const categoryModules = getSortedChildren(category.idMenu);
 
-    // Sort modules by order
-    categoryModules.sort((a, b) => {
-      const orderA = a.ordenMenu || 0;
-      const orderB = b.ordenMenu || 0;
-      return orderA - orderB;
-    });
-
-    // Create tiles from modules
+    // Dashboard rule:
+    // - If IdMenuNivel2 is null in SP row, MenuNivel3 arrives as direct child with route.
+    // - Otherwise, show MenuNivel2 (direct child) and navigate using first descendant route.
     const tiles: DashboardTile[] = categoryModules
-      .filter((m) => m.ruta) // Only include modules with routes
       .map((module) => ({
-        label: module.nombreMenu,
-        path: module.ruta || "#",
+        label: module.nombreMenu.trim(),
+        path: module.ruta || findFirstRouteDescendant(module.idMenu) || "#",
         badge: module.nombreMenu.charAt(0).toUpperCase(),
-      }));
+        ordenMenu: module.ordenMenu ?? 0,
+        children: buildTileChildren(module.idMenu),
+      }))
+      .filter((tile) => tile.path !== "#")
+      .sort((a, b) => {
+        const orderA = a.ordenMenu ?? 0;
+        const orderB = b.ordenMenu ?? 0;
+        if (orderA !== orderB) {
+          return orderA - orderB;
+        }
+
+        return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
+      });
 
     // Only add group if it has tiles (or force it anyway if NoModules)
     // Para evitar mostrar categorías vacías, ajusta esta condición
     if (tiles.length > 0 || true) {
-      const config = getCategoryConfig(category.codigoMenu);
+      const categoryKey = category.codigoMenu || category.nombreMenu;
+      const config = getCategoryConfig(categoryKey);
       groups.push({
         titulo: category.nombreMenu,
         subtitulo: config.subtitle,
         color: config.color,
         tiles,
-        codigoMenu: category.codigoMenu || undefined,
+        codigoMenu: categoryKey || undefined,
+        ordenMenu: category.ordenMenu ?? undefined,
       });
     }
   });
 
-  // Sort groups by configured order
+  // Sort groups by SegMenu.OrdenMenu and fallback to configured order
   groups.sort((a, b) => {
-    const orderA = getCategoryConfig(a.codigoMenu).order;
-    const orderB = getCategoryConfig(b.codigoMenu).order;
+    const orderA = a.ordenMenu ?? getCategoryConfig(a.codigoMenu || a.titulo).order;
+    const orderB = b.ordenMenu ?? getCategoryConfig(b.codigoMenu || b.titulo).order;
     return orderA - orderB;
   });
 

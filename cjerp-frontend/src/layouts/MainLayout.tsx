@@ -5,6 +5,7 @@ import { clearAuthUser, getAuthUser } from "../utils/authStorage";
 import {
   loadDashboardMenus,
   type DashboardGroup,
+  type DashboardTile,
 } from "../features/dashboard/services/dashboardMenuService";
 
 type FooterCopy = {
@@ -22,6 +23,34 @@ function formatPathLabel(value: string): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+function tileMatchesPath(tile: DashboardTile, pathname: string): boolean {
+  if (pathname.startsWith(tile.path)) {
+    return true;
+  }
+
+  return tile.children?.some((child) => tileMatchesPath(child, pathname)) ?? false;
+}
+
+function findDeepestTileMatch(
+  tiles: DashboardTile[],
+  pathname: string
+): DashboardTile | null {
+  let bestMatch: DashboardTile | null = null;
+
+  const visit = (tile: DashboardTile) => {
+    if (pathname.startsWith(tile.path)) {
+      if (!bestMatch || tile.path.length > bestMatch.path.length) {
+        bestMatch = tile;
+      }
+    }
+
+    tile.children?.forEach(visit);
+  };
+
+  tiles.forEach(visit);
+  return bestMatch;
+}
+
 function getFooterCopy(pathname: string, menuDashboard: DashboardGroup[]): FooterCopy {
   if (pathname.startsWith("/dashboard")) {
     return {
@@ -35,14 +64,15 @@ function getFooterCopy(pathname: string, menuDashboard: DashboardGroup[]): Foote
 
   for (const group of menuDashboard) {
     for (const tile of group.tiles) {
-      if (!pathname.startsWith(tile.path)) {
+      const deepestMatch = findDeepestTileMatch([tile], pathname);
+      if (!deepestMatch) {
         continue;
       }
 
       const currentMatch: FooterMatch = {
         groupTitle: group.titulo,
-        tileLabel: tile.label,
-        pathLength: tile.path.length,
+        tileLabel: deepestMatch.label,
+        pathLength: deepestMatch.path.length,
       };
 
       if (!bestMatch || currentMatch.pathLength > bestMatch.pathLength) {
@@ -124,8 +154,14 @@ export default function MainLayout() {
   };
 
   const menuActivo = menuDashboard.find((grupo) =>
-    grupo.tiles.some((tile) => location.pathname.startsWith(tile.path))
+    grupo.tiles.some((tile) => tileMatchesPath(tile, location.pathname))
   );
+
+  const tileActivo = menuActivo
+    ? menuActivo.tiles.find((tile) => tileMatchesPath(tile, location.pathname)) ?? null
+    : null;
+  const secondLevelItems = menuActivo?.tiles ?? [];
+  const thirdLevelItems = tileActivo?.children ?? [];
 
   const footerCopy = getFooterCopy(location.pathname, menuDashboard);
 
@@ -163,7 +199,7 @@ export default function MainLayout() {
             menuDashboard.map((grupo) => {
               const firstPath = grupo.tiles[0]?.path || "/dashboard";
               const activo = grupo.tiles.some((tile) =>
-                location.pathname.startsWith(tile.path)
+                tileMatchesPath(tile, location.pathname)
               );
 
               return (
@@ -184,25 +220,51 @@ export default function MainLayout() {
 
         {menuActivo && (
           <div style={styles.subMenuBar}>
-            <div style={styles.subMenuTitle}>{menuActivo.titulo}</div>
-            <div style={styles.subMenuItems}>
-              {menuActivo.tiles.map((tile) => {
-                const activo = location.pathname.startsWith(tile.path);
+            <div style={styles.subMenuSection}>
+              <div style={styles.subMenuTitle}>{menuActivo.titulo}</div>
+              <div style={styles.subMenuItems}>
+                {secondLevelItems.map((tile) => {
+                  const activo = tileMatchesPath(tile, location.pathname);
 
-                return (
-                  <NavLink
-                    key={tile.path}
-                    to={tile.path}
-                    style={{
-                      ...styles.subMenuItem,
-                      ...(activo ? styles.subMenuItemActive : {}),
-                    }}
-                  >
-                    {tile.label}
-                  </NavLink>
-                );
-              })}
+                  return (
+                    <NavLink
+                      key={tile.path}
+                      to={tile.path}
+                      style={{
+                        ...styles.subMenuItem,
+                        ...(activo ? styles.subMenuItemActive : {}),
+                      }}
+                    >
+                      {tile.label}
+                    </NavLink>
+                  );
+                })}
+              </div>
             </div>
+
+            {tileActivo && thirdLevelItems.length > 0 && (
+              <div style={{ ...styles.subMenuSection, ...styles.subMenuSectionAlignedRight }}>
+                <div style={styles.subMenuTitle}>{tileActivo.label}</div>
+                <div style={styles.subMenuItems}>
+                  {thirdLevelItems.map((tile) => {
+                    const activo = tileMatchesPath(tile, location.pathname);
+
+                    return (
+                      <NavLink
+                        key={tile.path}
+                        to={tile.path}
+                        style={{
+                          ...styles.thirdMenuItem,
+                          ...(activo ? styles.thirdMenuItemActive : {}),
+                        }}
+                      >
+                        {tile.label}
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -332,29 +394,38 @@ const styles: Record<string, React.CSSProperties> = {
   subMenuBar: {
     background: "#F8FAFC",
     borderBottom: "1px solid #E5E7EB",
-    padding: "10px 20px",
+    padding: "6px 14px",
     display: "flex",
     alignItems: "center",
-    gap: 16,
+    gap: 10,
     flexWrap: "wrap",
+  },
+  subMenuSection: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  subMenuSectionAlignedRight: {
+    marginLeft: "auto",
   },
   subMenuTitle: {
     fontWeight: 800,
-    fontSize: 15,
+    fontSize: 13,
     color: "#17143A",
-    minWidth: 140,
+    minWidth: 110,
   },
   subMenuItems: {
     display: "flex",
-    gap: 8,
+    gap: 6,
     flexWrap: "wrap",
   },
   subMenuItem: {
     textDecoration: "none",
     color: "#374151",
     fontWeight: 600,
-    fontSize: 13,
-    padding: "8px 12px",
+    fontSize: 12,
+    padding: "6px 10px",
     borderRadius: 8,
     background: "#FFFFFF",
     border: "1px solid #E5E7EB",
@@ -363,6 +434,21 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#EDE9FE",
     border: "1px solid #C4B5FD",
     color: "#17143A",
+  },
+  thirdMenuItem: {
+    textDecoration: "none",
+    color: "#4B5563",
+    fontWeight: 600,
+    fontSize: 11,
+    padding: "5px 9px",
+    borderRadius: 8,
+    background: "#F9FAFB",
+    border: "1px solid #E5E7EB",
+  },
+  thirdMenuItemActive: {
+    background: "#DBEAFE",
+    border: "1px solid #93C5FD",
+    color: "#1E3A8A",
   },
   main: {
     flex: 1,

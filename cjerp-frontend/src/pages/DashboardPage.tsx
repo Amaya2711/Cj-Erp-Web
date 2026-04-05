@@ -4,6 +4,19 @@ import { getAuthUser } from "../utils/authStorage";
 import { loadDashboardMenus } from "../features/dashboard/services/dashboardMenuService";
 import type { DashboardGroup } from "../features/dashboard/services/dashboardMenuService";
 
+function hexToRgba(hex: string, alpha: number): string {
+  const normalized = hex.replace("#", "").trim();
+  if (!/^[0-9a-fA-F]{6}$/.test(normalized)) {
+    return hex;
+  }
+
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const [dashboardMenus, setDashboardMenus] = useState<DashboardGroup[]>([]);
@@ -78,6 +91,8 @@ export default function DashboardPage() {
                 key={tile.path}
                 style={{
                   ...styles.tile,
+                  background: hexToRgba(grupo.color, 0.08),
+                  border: `1px solid ${hexToRgba(grupo.color, 0.35)}`,
                   borderTop: `5px solid ${grupo.color}`,
                 }}
                 onClick={() => navigate(tile.path)}
@@ -117,11 +132,11 @@ const styles: Record<string, React.CSSProperties> = {
   section: {
     background: "#FFFFFF",
     borderRadius: 18,
-    padding: 22,
+    padding: "12px 14px 14px 12px",
     boxShadow: "0 8px 24px rgba(23,20,58,0.06)",
   },
   sectionHeader: {
-    marginBottom: 2,
+    marginBottom: 4,
   },
   sectionTitle: {
     margin: 0,

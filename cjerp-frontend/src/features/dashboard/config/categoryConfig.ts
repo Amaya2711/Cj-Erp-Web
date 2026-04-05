@@ -51,7 +51,57 @@ export const CATEGORY_COLORS: Record<string, CategoryConfig> = {
     subtitle: "Gestión de pagos",
     order: 8,
   },
+  INICIO: {
+    color: "#3B82F6",
+    subtitle: "Panel inicial",
+    order: 0,
+  },
+  OPERACIONES: {
+    color: "#0F766E",
+    subtitle: "Flujo operativo",
+    order: 1,
+  },
+  COMERCIAL: {
+    color: "#7C3AED",
+    subtitle: "Ventas y clientes",
+    order: 4,
+  },
+  COMPRAS: {
+    color: "#EA580C",
+    subtitle: "Abastecimiento",
+    order: 5,
+  },
+  RECURSOSHUMANOS: {
+    color: "#BE185D",
+    subtitle: "Gestión de personal",
+    order: 6,
+  },
+  INFORMESEINTELIGENCIA: {
+    color: "#4338CA",
+    subtitle: "Reportes y analítica",
+    order: 11,
+  },
+  INFORMES: {
+    color: "#4338CA",
+    subtitle: "Reportes y analítica",
+    order: 11,
+  },
 };
+
+const CATEGORY_ALIASES: Record<string, string> = {
+  RECURSOS_HUMANOS: "RECURSOSHUMANOS",
+  RECURSOSHUMANOS: "RECURSOSHUMANOS",
+  INFORMES_E_INTELIGENCIA: "INFORMESEINTELIGENCIA",
+  INFORMESINTELIGENCIA: "INFORMESEINTELIGENCIA",
+};
+
+function normalizeCategoryKey(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+}
 
 /**
  * Get color configuration for a category
@@ -65,9 +115,10 @@ export function getCategoryConfig(codigoMenu: string | null | undefined): Catego
     };
   }
 
-  const key = codigoMenu.toUpperCase().trim();
+  const normalized = normalizeCategoryKey(codigoMenu);
+  const aliasKey = CATEGORY_ALIASES[normalized] || normalized;
   return (
-    CATEGORY_COLORS[key] || {
+    CATEGORY_COLORS[aliasKey] || {
       color: "#64748B",
       order: 999,
     }
