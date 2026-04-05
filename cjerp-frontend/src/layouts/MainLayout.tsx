@@ -12,82 +12,60 @@ type FooterCopy = {
   description: string;
 };
 
-function getFooterCopy(pathname: string): FooterCopy {
-  if (
-    pathname.startsWith("/seguridad/menu") ||
-    pathname.startsWith("/seguridad/SeguridadMenuPage")
-  ) {
-    return {
-      title: "Seguridad - Menu por rol",
-      description: "Asigne que opciones de menu estaran disponibles para cada rol",
-    };
-  }
+function formatPathLabel(value: string): string {
+  return value
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[-_]/g, " ")
+    .replace(/Page$/i, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
-  if (
-    pathname.startsWith("/seguridad/perfiles") ||
-    pathname.startsWith("/seguridad/SeguridadPerfilesPage")
-  ) {
-    return {
-      title: "Seguridad - Perfiles",
-      description: "Administracion de perfiles funcionales del sistema",
-    };
-  }
-
-  if (
-    pathname.startsWith("/seguridad/roles") ||
-    pathname.startsWith("/seguridad/SeguridadRolesPage")
-  ) {
-    return {
-      title: "Seguridad - Roles",
-      description: "Administracion de roles y niveles de acceso del sistema",
-    };
-  }
-
-  if (
-    pathname.startsWith("/seguridad/usuarios") ||
-    pathname.startsWith("/seguridad/SeguridadUsuariosPage")
-  ) {
-    return {
-      title: "Seguridad - Usuarios",
-      description: "Administracion de usuarios del sistema",
-    };
-  }
-
-  if (
-    pathname.startsWith("/seguridad/permisos") ||
-    pathname.startsWith("/seguridad/SeguridadPermisosPage")
-  ) {
-    return {
-      title: "Seguridad - Permisos",
-      description: "Asigne permisos por perfil, rol y usuario",
-    };
-  }
-
-  if (pathname.startsWith("/seguridad")) {
-    return {
-      title: "Gestion de Seguridad",
-      description: "Administracion centralizada de usuarios, perfiles, roles y permisos",
-    };
-  }
-
-  if (pathname.startsWith("/administracion/asistencia")) {
-    return {
-      title: "Administracion - Asistencia",
-      description: "Gestione asistencia del personal",
-    };
-  }
-
-  if (pathname.startsWith("/administracion/vacaciones")) {
-    return {
-      title: "Administracion - Vacaciones",
-      description: "Gestione solicitudes y control de vacaciones",
-    };
-  }
-
+function getFooterCopy(pathname: string, menuDashboard: DashboardGroup[]): FooterCopy {
   if (pathname.startsWith("/dashboard")) {
     return {
       title: "Panel principal",
       description: "Seleccione un modulo para continuar con la operacion del sistema",
+    };
+  }
+
+  type FooterMatch = { groupTitle: string; tileLabel: string; pathLength: number };
+  let bestMatch: FooterMatch | null = null;
+
+  for (const group of menuDashboard) {
+    for (const tile of group.tiles) {
+      if (!pathname.startsWith(tile.path)) {
+        continue;
+      }
+
+      const currentMatch: FooterMatch = {
+        groupTitle: group.titulo,
+        tileLabel: tile.label,
+        pathLength: tile.path.length,
+      };
+
+      if (!bestMatch || currentMatch.pathLength > bestMatch.pathLength) {
+        bestMatch = currentMatch;
+      }
+    }
+  }
+
+  if (bestMatch) {
+    return {
+      title: `${bestMatch.groupTitle} - ${bestMatch.tileLabel}`,
+      description: `Gestione ${bestMatch.tileLabel.toLowerCase()} del modulo ${bestMatch.groupTitle}.`,
+    };
+  }
+
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length > 0) {
+    const moduleTitle = formatPathLabel(segments[0]);
+    const pageTitle = formatPathLabel(segments[segments.length - 1]);
+
+    return {
+      title: `${moduleTitle} - ${pageTitle}`,
+      description: `Gestione ${pageTitle.toLowerCase()} del modulo ${moduleTitle}.`,
     };
   }
 
@@ -149,83 +127,85 @@ export default function MainLayout() {
     grupo.tiles.some((tile) => location.pathname.startsWith(tile.path))
   );
 
-  const footerCopy = getFooterCopy(location.pathname);
+  const footerCopy = getFooterCopy(location.pathname, menuDashboard);
 
   return (
     <div style={styles.wrapper}>
-      <header style={styles.header}>
-        <div style={styles.brandBox} onClick={irDashboard}>
-          <img src={logo} alt="CJ Telecom" style={styles.logo} />
-          <div>
-            <div style={styles.brandTitle}></div>
-            <div style={styles.brandSubtitle}>Portal de Aplicaciones</div>
-          </div>
-        </div>
-
-        <div style={styles.headerRight}>
-          <div style={styles.userInfoBox}>
-            <div style={styles.userLabel}>Usuario: {usuarioMostrar}</div>
-            <div style={styles.employeeLabel}>
-              Empleado: {empleadoMostrar || "NO DEFINIDO"}
+      <div style={styles.pageHeader}>
+        <header style={styles.header}>
+          <div style={styles.brandBox} onClick={irDashboard}>
+            <img src={logo} alt="CJ Telecom" style={styles.logo} />
+            <div>
+              <div style={styles.brandTitle}></div>
+              <div style={styles.brandSubtitle}>Portal de Aplicaciones</div>
             </div>
           </div>
-          <button style={styles.logoutButton} onClick={cerrarSesion}>
-            Cerrar sesión
-          </button>
-        </div>
-      </header>
 
-      <nav style={styles.topMenu}>
-        {!menuLoading && menuDashboard.length === 0 ? (
-          <div style={styles.topMenuEmpty}>
-            Usuario no tiene opciones de menu configurado
+          <div style={styles.headerRight}>
+            <div style={styles.userInfoBox}>
+              <div style={styles.userLabel}>Usuario: {usuarioMostrar}</div>
+              <div style={styles.employeeLabel}>
+                Empleado: {empleadoMostrar || "NO DEFINIDO"}
+              </div>
+            </div>
+            <button style={styles.logoutButton} onClick={cerrarSesion}>
+              Cerrar sesión
+            </button>
           </div>
-        ) : (
-          menuDashboard.map((grupo) => {
-            const firstPath = grupo.tiles[0]?.path || "/dashboard";
-            const activo = grupo.tiles.some((tile) =>
-              location.pathname.startsWith(tile.path)
-            );
+        </header>
 
-            return (
-              <NavLink
-                key={grupo.titulo}
-                to={firstPath}
-                style={{
-                  ...styles.topMenuItem,
-                  ...(activo ? styles.topMenuItemActive : {}),
-                }}
-              >
-                {grupo.titulo}
-              </NavLink>
-            );
-          })
-        )}
-      </nav>
-
-      {menuActivo && (
-        <div style={styles.subMenuBar}>
-          <div style={styles.subMenuTitle}>{menuActivo.titulo}</div>
-          <div style={styles.subMenuItems}>
-            {menuActivo.tiles.map((tile) => {
-              const activo = location.pathname.startsWith(tile.path);
+        <nav style={styles.topMenu}>
+          {!menuLoading && menuDashboard.length === 0 ? (
+            <div style={styles.topMenuEmpty}>
+              Usuario no tiene opciones de menu configurado
+            </div>
+          ) : (
+            menuDashboard.map((grupo) => {
+              const firstPath = grupo.tiles[0]?.path || "/dashboard";
+              const activo = grupo.tiles.some((tile) =>
+                location.pathname.startsWith(tile.path)
+              );
 
               return (
                 <NavLink
-                  key={tile.path}
-                  to={tile.path}
+                  key={grupo.titulo}
+                  to={firstPath}
                   style={{
-                    ...styles.subMenuItem,
-                    ...(activo ? styles.subMenuItemActive : {}),
+                    ...styles.topMenuItem,
+                    ...(activo ? styles.topMenuItemActive : {}),
                   }}
                 >
-                  {tile.label}
+                  {grupo.titulo}
                 </NavLink>
               );
-            })}
+            })
+          )}
+        </nav>
+
+        {menuActivo && (
+          <div style={styles.subMenuBar}>
+            <div style={styles.subMenuTitle}>{menuActivo.titulo}</div>
+            <div style={styles.subMenuItems}>
+              {menuActivo.tiles.map((tile) => {
+                const activo = location.pathname.startsWith(tile.path);
+
+                return (
+                  <NavLink
+                    key={tile.path}
+                    to={tile.path}
+                    style={{
+                      ...styles.subMenuItem,
+                      ...(activo ? styles.subMenuItemActive : {}),
+                    }}
+                  >
+                    {tile.label}
+                  </NavLink>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <main style={styles.main}>
         <Outlet />
@@ -247,6 +227,12 @@ const styles: Record<string, React.CSSProperties> = {
     background: "#F3F5F9",
     display: "flex",
     flexDirection: "column",
+  },
+  pageHeader: {
+    position: "sticky",
+    top: 0,
+    zIndex: 1100,
+    boxShadow: "0 4px 14px rgba(23,20,58,0.08)",
   },
   header: {
     height: 88,
@@ -317,7 +303,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 56,
     display: "flex",
     alignItems: "center",
-    gap: 10,
+    gap: 0,
     padding: "0 20px",
     boxSizing: "border-box",
     borderBottom: "1px solid #E5E7EB",
@@ -380,7 +366,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   main: {
     flex: 1,
-    padding: 24,
+    padding: 12,
     paddingBottom: 82,
     boxSizing: "border-box",
   },

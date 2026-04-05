@@ -42,12 +42,7 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div style={styles.page}>
-        <div style={styles.hero}>
-          <div>
-            <h1 style={styles.heroTitle}>Panel principal</h1>
-            <p style={styles.heroText}>Cargando menús...</p>
-          </div>
-        </div>
+        <p style={styles.statusText}>Cargando menús...</p>
       </div>
     );
   }
@@ -55,32 +50,24 @@ export default function DashboardPage() {
   if (error) {
     return (
       <div style={styles.page}>
-        <div style={styles.hero}>
-          <div>
-            <h1 style={styles.heroTitle}>Panel principal</h1>
-            <p style={{ ...styles.heroText, color: "#ff6b6b" }}>{error}</p>
-          </div>
-        </div>
+        <p style={{ ...styles.statusText, color: "#D14343" }}>{error}</p>
       </div>
     );
   }
 
   return (
     <div style={styles.page}>
-      <div style={styles.hero}>
-        <div>
-          <h1 style={styles.heroTitle}>Panel principal</h1>
-          <p style={styles.heroText}>
-            Seleccione un módulo para continuar con la operación del sistema.
-          </p>
-        </div>
-      </div>
-
       {dashboardMenus.map((grupo) => (
-        <section key={grupo.titulo} style={styles.section}>
+        <section 
+          key={grupo.titulo} 
+          style={{
+            ...styles.section,
+            borderLeft: `5px solid ${grupo.color}`,
+          }}
+        >
           <div style={styles.sectionHeader}>
             <div>
-              <h2 style={styles.sectionTitle}>{grupo.titulo}</h2>
+              <h2 style={{...styles.sectionTitle, color: grupo.color}}>{grupo.titulo}</h2>
               <div style={styles.sectionSubtitle}>{grupo.subtitulo}</div>
             </div>
           </div>
@@ -105,19 +92,7 @@ export default function DashboardPage() {
                     "0 6px 18px rgba(23,20,58,0.05)";
                 }}
               >
-                <div style={styles.tileTop}>
-                  <div
-                    style={{
-                      ...styles.tileIcon,
-                      background: grupo.color,
-                    }}
-                  >
-                    {grupo.titulo.substring(0, 1)}
-                  </div>
-                </div>
-
                 <div style={styles.tileLabel}>{tile.label}</div>
-                <div style={styles.tileAction}>Abrir módulo</div>
               </button>
             ))}
           </div>
@@ -131,25 +106,13 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     display: "flex",
     flexDirection: "column",
-    gap: 28,
+    gap: 4,
   },
-  hero: {
-    background: "linear-gradient(135deg, #17143A 0%, #2A2460 100%)",
-    color: "#FFFFFF",
-    borderRadius: 20,
-    padding: "28px 30px",
-    boxShadow: "0 10px 30px rgba(23,20,58,0.15)",
-  },
-  heroTitle: {
+  statusText: {
     margin: 0,
-    fontSize: 28,
-    fontWeight: 800,
-  },
-  heroText: {
-    marginTop: 10,
-    marginBottom: 0,
     fontSize: 15,
-    opacity: 0.95,
+    color: "#374151",
+    fontWeight: 600,
   },
   section: {
     background: "#FFFFFF",
@@ -158,7 +121,7 @@ const styles: Record<string, React.CSSProperties> = {
     boxShadow: "0 8px 24px rgba(23,20,58,0.06)",
   },
   sectionHeader: {
-    marginBottom: 18,
+    marginBottom: 2,
   },
   sectionTitle: {
     margin: 0,
@@ -167,21 +130,21 @@ const styles: Record<string, React.CSSProperties> = {
     color: "#17143A",
   },
   sectionSubtitle: {
-    marginTop: 6,
+    marginTop: 2,
     fontSize: 13,
     color: "#6B7280",
   },
   tilesGrid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
-    gap: 16,
+    gap: 4,
   },
   tile: {
     border: "1px solid #E5E7EB",
     borderRadius: 16,
     background: "#FFFFFF",
-    minHeight: 150,
-    padding: 18,
+    minHeight: 95,
+    padding: 10,
     textAlign: "left",
     cursor: "pointer",
     boxShadow: "0 6px 18px rgba(23,20,58,0.05)",
@@ -191,7 +154,7 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 14,
   },
   tileIcon: {
     width: 42,
@@ -209,7 +172,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontWeight: 800,
     color: "#17143A",
     lineHeight: 1.35,
-    minHeight: 48,
+    minHeight: 32,
   },
   tileAction: {
     marginTop: 16,
