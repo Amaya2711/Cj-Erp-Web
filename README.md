@@ -1,36 +1,89 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AGH ERP Web
 
-## Getting Started
+Plataforma ERP modular construida con Next.js App Router, TypeScript estricto, Tailwind CSS y Supabase.
 
-First, run the development server:
+## Stack
 
-```bash
+- Next.js 16 (App Router)
+- TypeScript estricto
+- Tailwind CSS v4
+- Supabase (PostgreSQL + Auth)
+- React Hook Form + Zod
+
+## Estructura
+
+- app: rutas, layouts y API routes
+- modules: dominios ERP (auth, clientes, etc.)
+- components: UI reutilizable
+- services: integraciones (Supabase)
+- lib: utilidades, constantes, entorno
+- types: tipos globales y DB
+- hooks: hooks reutilizables
+
+## Variables de entorno
+
+Copia .env.example en .env.local y completa:
+
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+
+## Modelo inicial requerido
+
+El modulo clientes usa la tabla public.cliente con estos campos:
+
+- id_cliente uuid primary key default uuid_generate_v4()
+- nombre varchar not null
+- ruc varchar not null
+- direccion varchar null
+- telefono varchar null
+- estado boolean not null default true
+- created_at timestamptz not null default now()
+- created_by uuid null
+- updated_at timestamptz null
+- updated_by uuid null
+
+## Recomendacion SQL minima
+
+Asegura extension UUID:
+
+create extension if not exists "uuid-ossp";
+
+## Desarrollo local
+
+1. Instalar dependencias
+npm install
+
+2. Ejecutar app
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3. Abrir
+http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Flujo funcional incluido
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Login con Supabase Auth
+- Persistencia de sesion
+- Rutas protegidas con middleware
+- Layout ERP con sidebar y header
+- Dashboard inicial
+- CRUD completo del modulo Clientes
+- Validacion con Zod
+- Formularios con React Hook Form
 
-## Learn More
+## Despliegue en Vercel
 
-To learn more about Next.js, take a look at the following resources:
+1. Subir repositorio a GitHub.
+2. Importar proyecto en Vercel.
+3. Configurar variables de entorno del proyecto:
+	- NEXT_PUBLIC_SUPABASE_URL
+	- NEXT_PUBLIC_SUPABASE_ANON_KEY
+	- SUPABASE_SERVICE_ROLE_KEY
+4. Deploy.
+5. Configurar en Supabase Auth URLs de redireccion para tu dominio Vercel.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Seguridad recomendada (siguiente paso)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Activar RLS en todas las tablas ERP.
+- Crear politicas por usuario/rol.
+- Agregar tabla de roles y permisos por modulo.
