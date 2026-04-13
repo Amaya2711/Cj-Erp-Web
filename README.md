@@ -62,9 +62,9 @@ http://localhost:3000
 
 ## Flujo funcional incluido
 
-- Login con Supabase Auth
+- Login con tabla usuario (nombre_usuario y clave)
 - Persistencia de sesion
-- Rutas protegidas con middleware
+- Rutas protegidas con proxy
 - Layout ERP con sidebar y header
 - Dashboard inicial
 - CRUD completo del modulo Clientes
@@ -87,3 +87,8 @@ http://localhost:3000
 - Activar RLS en todas las tablas ERP.
 - Crear politicas por usuario/rol.
 - Agregar tabla de roles y permisos por modulo.
+
+## Nota de autenticacion
+
+- El login actual valida contra public.usuario (nombre_usuario y clave).
+- Define AUTH_SESSION_SECRET para firmar la cookie de sesion.

@@ -4,18 +4,18 @@ import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { createBrowserSupabaseClient } from "@/services/supabase/browser-client";
 
 interface AppHeaderProps {
-  userEmail: string;
+  username: string;
 }
 
-export function AppHeader({ userEmail }: AppHeaderProps) {
+export function AppHeader({ username }: AppHeaderProps) {
   const router = useRouter();
 
   async function handleLogout() {
-    const supabase = createBrowserSupabaseClient();
-    await supabase.auth.signOut();
+    await fetch("/api/auth/logout", {
+      method: "POST",
+    });
     router.replace("/login");
     router.refresh();
   }
@@ -29,7 +29,7 @@ export function AppHeader({ userEmail }: AppHeaderProps) {
       <div className="flex items-center gap-4">
         <div className="text-right">
           <p className="text-xs text-muted-foreground">Usuario</p>
-          <p className="text-sm font-semibold text-foreground">{userEmail}</p>
+          <p className="text-sm font-semibold text-foreground">{username}</p>
         </div>
         <Button variant="secondary" onClick={handleLogout} className="gap-2">
           <LogOut className="h-4 w-4" />

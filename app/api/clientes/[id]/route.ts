@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { clienteSchema } from "@/modules/clientes/domain/schemas/cliente.schema";
 import { deleteCliente, updateCliente } from "@/modules/clientes/infrastructure/cliente.repository";
+import { getServerAuthSession } from "@/services/auth/session";
 import { createServerSupabaseClient } from "@/services/supabase/server-client";
 
 interface RouteParams {
@@ -11,16 +12,12 @@ interface RouteParams {
 export async function PUT(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getServerAuthSession();
+    if (!user) {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
+    const supabase = await createServerSupabaseClient();
     const body = await request.json();
     const parsed = clienteSchema.safeParse(body);
 
@@ -40,7 +37,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
       direccion: parsed.data.direccion || null,
       telefono: parsed.data.telefono || null,
       estado: parsed.data.estado,
-      updated_by: user.id,
+      updated_by: user.userId,
       updated_at: new Date().toISOString(),
     });
 
@@ -53,16 +50,12 @@ export async function PUT(request: Request, { params }: RouteParams) {
 export async function DELETE(_: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getServerAuthSession();
+    if (!user) {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
+    const supabase = await createServerSupabaseClient();
     await deleteCliente(supabase, id);
     return NextResponse.json({ message: "Cliente eliminado" }, { status: 200 });
   } catch {

@@ -20,7 +20,10 @@ export function AppSidebar() {
         {ERP_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-          const isEnabled = item.href === "/dashboard" || item.href === "/clientes";
+          const isEnabled =
+            item.href === "/dashboard" ||
+            item.href === "/clientes" ||
+            item.href === "/cotizaciones";
 
           return (
             <Link

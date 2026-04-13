@@ -1,15 +1,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-import { updateSession } from "@/services/supabase/middleware-client";
+import { getRequestAuthSession } from "@/services/auth/session";
 
 const PUBLIC_ROUTES = ["/login"];
-const PROTECTED_ROUTES = ["/dashboard", "/clientes"];
+const PROTECTED_ROUTES = ["/dashboard", "/clientes", "/cotizaciones"];
 
 function startsWithOneOf(pathname: string, routes: string[]) {
   return routes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (
@@ -20,7 +20,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const { response, user } = await updateSession(request);
+  const user = getRequestAuthSession(request);
   const isPublicRoute = startsWithOneOf(pathname, PUBLIC_ROUTES);
   const isProtectedRoute = startsWithOneOf(pathname, PROTECTED_ROUTES);
 
@@ -36,7 +36,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

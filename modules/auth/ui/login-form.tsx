@@ -8,11 +8,10 @@ import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createBrowserSupabaseClient } from "@/services/supabase/browser-client";
 
 const loginSchema = z.object({
-  email: z.email("Ingresa un correo valido"),
-  password: z.string().min(6, "La contrasena debe tener al menos 6 caracteres"),
+  nombre_usuario: z.string().min(1, "Ingresa tu usuario"),
+  clave: z.string().min(1, "Ingresa tu clave"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -28,21 +27,23 @@ export function LoginForm() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      nombre_usuario: "",
+      clave: "",
     },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setServerError(null);
 
-    const supabase = createBrowserSupabaseClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password,
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(values),
     });
 
-    if (error) {
+    if (!response.ok) {
       setServerError("No se pudo iniciar sesion. Verifica tus credenciales.");
       return;
     }
@@ -54,9 +55,9 @@ export function LoginForm() {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <div>
-        <label className="mb-1 block text-sm font-semibold text-foreground">Correo corporativo</label>
-        <Input type="email" autoComplete="email" placeholder="usuario@empresa.com" {...register("email")} />
-        {errors.email ? <p className="mt-1 text-xs text-danger">{errors.email.message}</p> : null}
+        <label className="mb-1 block text-sm font-semibold text-foreground">Usuario</label>
+        <Input type="text" autoComplete="username" placeholder="Ingresa tu usuario" {...register("nombre_usuario")} />
+        {errors.nombre_usuario ? <p className="mt-1 text-xs text-danger">{errors.nombre_usuario.message}</p> : null}
       </div>
 
       <div>
@@ -65,9 +66,9 @@ export function LoginForm() {
           type="password"
           autoComplete="current-password"
           placeholder="Ingresa tu contrasena"
-          {...register("password")}
+          {...register("clave")}
         />
-        {errors.password ? <p className="mt-1 text-xs text-danger">{errors.password.message}</p> : null}
+        {errors.clave ? <p className="mt-1 text-xs text-danger">{errors.clave.message}</p> : null}
       </div>
 
       {serverError ? <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-danger">{serverError}</p> : null}

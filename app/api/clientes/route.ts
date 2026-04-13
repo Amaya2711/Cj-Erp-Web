@@ -2,20 +2,17 @@ import { NextResponse } from "next/server";
 
 import { clienteSchema } from "@/modules/clientes/domain/schemas/cliente.schema";
 import { createCliente, listClientes } from "@/modules/clientes/infrastructure/cliente.repository";
+import { getServerAuthSession } from "@/services/auth/session";
 import { createServerSupabaseClient } from "@/services/supabase/server-client";
 
 export async function GET() {
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getServerAuthSession();
+    if (!user) {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
+    const supabase = await createServerSupabaseClient();
     const clientes = await listClientes(supabase);
     return NextResponse.json(clientes, { status: 200 });
   } catch {
@@ -25,16 +22,12 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createServerSupabaseClient();
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    const user = await getServerAuthSession();
+    if (!user) {
       return NextResponse.json({ message: "No autorizado" }, { status: 401 });
     }
 
+    const supabase = await createServerSupabaseClient();
     const body = await request.json();
     const parsed = clienteSchema.safeParse(body);
 
@@ -54,8 +47,8 @@ export async function POST(request: Request) {
       direccion: parsed.data.direccion || null,
       telefono: parsed.data.telefono || null,
       estado: parsed.data.estado,
-      created_by: user.id,
-      updated_by: user.id,
+      created_by: user.userId,
+      updated_by: user.userId,
       updated_at: new Date().toISOString(),
     });
 

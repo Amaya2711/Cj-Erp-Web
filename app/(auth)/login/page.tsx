@@ -1,13 +1,10 @@
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/modules/auth/ui/login-form";
-import { createServerSupabaseClient } from "@/services/supabase/server-client";
+import { getServerAuthSession } from "@/services/auth/session";
 
 export default async function LoginPage() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getServerAuthSession();
 
   if (user) {
     redirect("/dashboard");
@@ -33,7 +30,7 @@ export default async function LoginPage() {
         <div className="card-enter w-full max-w-md rounded-2xl border border-border bg-surface p-8 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">Acceso seguro</p>
           <h2 className="mt-2 text-2xl font-bold text-foreground">Iniciar sesion</h2>
-          <p className="mt-1 text-sm text-muted-foreground">Autenticacion administrada por Supabase Auth.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Autenticacion con usuarios internos del ERP.</p>
 
           <div className="mt-6">
             <LoginForm />
