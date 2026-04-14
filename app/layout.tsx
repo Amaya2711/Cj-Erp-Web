@@ -15,7 +15,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 
 export const metadata: Metadata = {
   title: "AGH ERP",
-  description: "ERP modular sobre Next.js y Supabase",
+  description: "ERP modular sobre Next.js y Supabase.",
 };
 
 export default function RootLayout({
