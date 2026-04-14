@@ -1,0 +1,16 @@
+Variables globales
+cuadrilla
+idusuario
+nombreEmpleado
+codEmp
+CodVal
+ipLocal
+networkType
+
+validar si estas en el rango permitido para grabar, igual te debe permitir grabar si en caso dice si.
+
+-12.07835, -76.958917
+
+principal
+161.132.48.29
+@3IS0@ejwU4A7VOHba990

@@ -1,0 +1,124 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="DataSet1" targetNamespace="http://tempuri.org/DataSet1.xsd" xmlns:mstns="http://tempuri.org/DataSet1.xsd" xmlns="http://tempuri.org/DataSet1.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="MySettings" AppSettingsPropertyName="ConnectionString" ConnectionStringObject="" IsAppSettingsProperty="true" Modifier="Assembly" Name="ConnectionString (MySettings)" PropertyReference="ApplicationSettings.PryCotizacion_AGH.My.MySettings.GlobalReference.Default.ConnectionString" Provider="System.Data.Odbc" />
+        </Connections>
+        <Tables>
+          <TableAdapter BaseClass="System.ComponentModel.Component" DataAccessorModifier="AutoLayout, AnsiClass, Class, Public" DataAccessorName="CotizacionCabTableAdapter" GeneratorDataComponentClassName="CotizacionCabTableAdapter" Name="CotizacionCab" UserDataComponentName="CotizacionCabTableAdapter">
+            <MainSource>
+              <DbSource ConnectionRef="ConnectionString (MySettings)" DbObjectType="Unknown" FillMethodModifier="Public" FillMethodName="Fill" GenerateMethods="Both" GenerateShortCommands="false" GeneratorGetMethodName="GetData" GeneratorSourceName="Fill" GetMethodModifier="Public" GetMethodName="GetData" QueryType="Rowset" ScalarCallRetval="System.Object, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" UseOptimisticConcurrency="false" UserGetMethodName="GetData" UserSourceName="Fill">
+                <SelectCommand>
+                  <DbCommand CommandType="Text" ModifiedByUser="true">
+                    <CommandText>SELECT Cliente.Nombre_cli, Cliente.RUC, Cliente.Direccion_Cli, Cotizacion.Correlativo, Cotizacion.Año, Cotizacion.Fecha, Cotizacion.Valido, Cotizacion.Entrega, Cotizacion.Subtotal, Cotizacion.IGV, Cotizacion.Total, Moneda.Tipo_moneda, 
+                  Tipo_Pago.Forma_Pago,
+Detalle_Cotizacion.Cantidad, Detalle_Cotizacion.descripcion, Detalle_Cotizacion.PrecioUnitario,
+Detalle_Cotizacion.Total as STotal, Cotizacion.DiasCredito
+FROM     Cotizacion, Moneda, Tipo_Pago, Cliente, Detalle_Cotizacion
+WHERE  Cotizacion.Moneda = Moneda.Id AND Cotizacion.Pago = Tipo_Pago.Id AND Cotizacion.Id_Cliente = Cliente.Id and cotizacion.correlativo = detalle_cotizacion.correlativo and cotizacion.año = detalle_cotizacion.año</CommandText>
+                    <Parameters />
+                  </DbCommand>
+                </SelectCommand>
+              </DbSource>
+            </MainSource>
+            <Mappings>
+              <Mapping SourceColumn="Nombre_cli" DataSetColumn="Nombre_cli" />
+              <Mapping SourceColumn="RUC" DataSetColumn="RUC" />
+              <Mapping SourceColumn="Direccion_Cli" DataSetColumn="Direccion_Cli" />
+              <Mapping SourceColumn="Correlativo" DataSetColumn="Correlativo" />
+              <Mapping SourceColumn="Año" DataSetColumn="Año" />
+              <Mapping SourceColumn="Fecha" DataSetColumn="Fecha" />
+              <Mapping SourceColumn="Valido" DataSetColumn="Valido" />
+              <Mapping SourceColumn="Entrega" DataSetColumn="Entrega" />
+              <Mapping SourceColumn="Subtotal" DataSetColumn="Subtotal" />
+              <Mapping SourceColumn="IGV" DataSetColumn="IGV" />
+              <Mapping SourceColumn="Total" DataSetColumn="Total" />
+              <Mapping SourceColumn="Tipo_moneda" DataSetColumn="Tipo_moneda" />
+              <Mapping SourceColumn="Forma_Pago" DataSetColumn="Forma_Pago" />
+              <Mapping SourceColumn="Cantidad" DataSetColumn="Cantidad" />
+              <Mapping SourceColumn="descripcion" DataSetColumn="descripcion" />
+              <Mapping SourceColumn="PrecioUnitario" DataSetColumn="PrecioUnitario" />
+              <Mapping SourceColumn="STotal" DataSetColumn="STotal" />
+              <Mapping SourceColumn="DiasCredito" DataSetColumn="DiasCredito" />
+            </Mappings>
+            <Sources />
+          </TableAdapter>
+        </Tables>
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="DataSet1" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="DataSet1" msprop:Generator_UserDSName="DataSet1">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="CotizacionCab" msprop:Generator_TableClassName="CotizacionCabDataTable" msprop:Generator_TableVarName="tableCotizacionCab" msprop:Generator_TablePropName="CotizacionCab" msprop:Generator_RowDeletingName="CotizacionCabRowDeleting" msprop:Generator_RowChangingName="CotizacionCabRowChanging" msprop:Generator_RowEvHandlerName="CotizacionCabRowChangeEventHandler" msprop:Generator_RowDeletedName="CotizacionCabRowDeleted" msprop:Generator_UserTableName="CotizacionCab" msprop:Generator_RowChangedName="CotizacionCabRowChanged" msprop:Generator_RowEvArgName="CotizacionCabRowChangeEvent" msprop:Generator_RowClassName="CotizacionCabRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Nombre_cli" msprop:Generator_ColumnVarNameInTable="columnNombre_cli" msprop:Generator_ColumnPropNameInRow="Nombre_cli" msprop:Generator_ColumnPropNameInTable="Nombre_cliColumn" msprop:Generator_UserColumnName="Nombre_cli" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="RUC" msprop:Generator_ColumnVarNameInTable="columnRUC" msprop:Generator_ColumnPropNameInRow="RUC" msprop:Generator_ColumnPropNameInTable="RUCColumn" msprop:Generator_UserColumnName="RUC" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="11" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Direccion_Cli" msprop:Generator_ColumnVarNameInTable="columnDireccion_Cli" msprop:Generator_ColumnPropNameInRow="Direccion_Cli" msprop:Generator_ColumnPropNameInTable="Direccion_CliColumn" msprop:Generator_UserColumnName="Direccion_Cli" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Correlativo" msprop:Generator_ColumnVarNameInTable="columnCorrelativo" msprop:Generator_ColumnPropNameInRow="Correlativo" msprop:Generator_ColumnPropNameInTable="CorrelativoColumn" msprop:Generator_UserColumnName="Correlativo" type="xs:int" />
+              <xs:element name="Año" msprop:Generator_ColumnVarNameInTable="columnAño" msprop:Generator_ColumnPropNameInRow="Año" msprop:Generator_ColumnPropNameInTable="AñoColumn" msprop:Generator_UserColumnName="Año" type="xs:int" />
+              <xs:element name="Fecha" msprop:Generator_ColumnVarNameInTable="columnFecha" msprop:Generator_ColumnPropNameInRow="Fecha" msprop:Generator_ColumnPropNameInTable="FechaColumn" msprop:Generator_UserColumnName="Fecha" type="xs:dateTime" minOccurs="0" />
+              <xs:element name="Valido" msprop:Generator_ColumnVarNameInTable="columnValido" msprop:Generator_ColumnPropNameInRow="Valido" msprop:Generator_ColumnPropNameInTable="ValidoColumn" msprop:Generator_UserColumnName="Valido" type="xs:int" minOccurs="0" />
+              <xs:element name="Entrega" msprop:Generator_ColumnVarNameInTable="columnEntrega" msprop:Generator_ColumnPropNameInRow="Entrega" msprop:Generator_ColumnPropNameInTable="EntregaColumn" msprop:Generator_UserColumnName="Entrega" type="xs:int" minOccurs="0" />
+              <xs:element name="Subtotal" msprop:Generator_ColumnVarNameInTable="columnSubtotal" msprop:Generator_ColumnPropNameInRow="Subtotal" msprop:Generator_ColumnPropNameInTable="SubtotalColumn" msprop:Generator_UserColumnName="Subtotal" type="xs:double" minOccurs="0" />
+              <xs:element name="IGV" msprop:Generator_ColumnVarNameInTable="columnIGV" msprop:Generator_ColumnPropNameInRow="IGV" msprop:Generator_ColumnPropNameInTable="IGVColumn" msprop:Generator_UserColumnName="IGV" type="xs:double" minOccurs="0" />
+              <xs:element name="Total" msprop:Generator_ColumnVarNameInTable="columnTotal" msprop:Generator_ColumnPropNameInRow="Total" msprop:Generator_ColumnPropNameInTable="TotalColumn" msprop:Generator_UserColumnName="Total" type="xs:double" minOccurs="0" />
+              <xs:element name="Tipo_moneda" msprop:Generator_ColumnVarNameInTable="columnTipo_moneda" msprop:Generator_ColumnPropNameInRow="Tipo_moneda" msprop:Generator_ColumnPropNameInTable="Tipo_monedaColumn" msprop:Generator_UserColumnName="Tipo_moneda" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Forma_Pago" msprop:Generator_ColumnVarNameInTable="columnForma_Pago" msprop:Generator_ColumnPropNameInRow="Forma_Pago" msprop:Generator_ColumnPropNameInTable="Forma_PagoColumn" msprop:Generator_UserColumnName="Forma_Pago" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Cantidad" msprop:Generator_ColumnVarNameInTable="columnCantidad" msprop:Generator_ColumnPropNameInRow="Cantidad" msprop:Generator_ColumnPropNameInTable="CantidadColumn" msprop:Generator_UserColumnName="Cantidad" type="xs:int" minOccurs="0" />
+              <xs:element name="descripcion" msprop:Generator_ColumnVarNameInTable="columndescripcion" msprop:Generator_ColumnPropNameInRow="descripcion" msprop:Generator_ColumnPropNameInTable="descripcionColumn" msprop:Generator_UserColumnName="descripcion" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="255" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="PrecioUnitario" msprop:Generator_ColumnVarNameInTable="columnPrecioUnitario" msprop:Generator_ColumnPropNameInRow="PrecioUnitario" msprop:Generator_ColumnPropNameInTable="PrecioUnitarioColumn" msprop:Generator_UserColumnName="PrecioUnitario" type="xs:double" minOccurs="0" />
+              <xs:element name="STotal" msprop:Generator_ColumnVarNameInTable="columnSTotal" msprop:Generator_ColumnPropNameInRow="STotal" msprop:Generator_ColumnPropNameInTable="STotalColumn" msprop:Generator_UserColumnName="STotal" type="xs:double" minOccurs="0" />
+              <xs:element name="DiasCredito" msprop:Generator_ColumnVarNameInTable="columnDiasCredito" msprop:Generator_ColumnPropNameInRow="DiasCredito" msprop:Generator_ColumnPropNameInTable="DiasCreditoColumn" msprop:Generator_UserColumnName="DiasCredito" type="xs:int" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="Constraint1" msdata:PrimaryKey="true">
+      <xs:selector xpath=".//mstns:CotizacionCab" />
+      <xs:field xpath="mstns:Correlativo" />
+      <xs:field xpath="mstns:Año" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>
