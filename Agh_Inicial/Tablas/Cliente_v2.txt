@@ -1,0 +1,5 @@
+nombre	ruc	direccion	telefono	estado
+JJ ARQUITECTURA DISEÑO Y CONSTRUCCION E.I.R.L.	20606041331	cal los artesanos urb pro industrial mz d lote 13 int 1 SMP		TRUE
+STEEL INGENERIA SAC	20600629817	Jr mariano angulo 2140 lima		TRUE
+PRODUCTOS DE ACERO CASSADO SA	20254053822	av nestor gambetta 6429  callao		TRUE
+CONDE ATENCION SERVICIOS MULTIPLES SAC	20505482108	av alejandro bertello urb san remo III SMP		TRUE
