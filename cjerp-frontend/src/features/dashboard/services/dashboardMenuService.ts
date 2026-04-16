@@ -166,7 +166,7 @@ export async function loadDashboardMenus(
   idUsuario: string
 ): Promise<DashboardGroup[]> {
   try {
-    const menus = await menuService.obtenerPorUsuario(idUsuario);
+    const menus = await menuService.obtenerMenuDinamicoPorUsuario(idUsuario);
     return transformMenusToDashboard(menus);
   } catch (error) {
     console.error("Error loading dashboard menus for user:", idUsuario, error);

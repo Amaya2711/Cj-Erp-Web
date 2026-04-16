@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./PrivateRoute";
+import AutoSecurityRoute from "./AutoSecurityRoute";
 import MainLayout from "../../layouts/MainLayout";
 
 import LoginPage from "../../features/auth/pages/LoginPage";
 import DashboardPage from "../../pages/DashboardPage";
+import DynamicMenuRoutePage from "../../pages/DynamicMenuRoutePage";
 
 import SeguridadPage from "../../pages/seguridad/SeguridadPage";
 import SeguridadUsuariosPage from "../../pages/seguridad/SeguridadUsuariosPage";
@@ -12,6 +14,8 @@ import SeguridadPerfilesPage from "../../pages/seguridad/SeguridadPerfilesPage";
 import SeguridadRolesPage from "../../pages/seguridad/SeguridadRolesPage";
 import SeguridadMenuPage from "../../pages/seguridad/SeguridadMenuPage.tsx";
 import SeguridadPermisosPage from "../../pages/seguridad/SeguridadPermisosPage";
+import SeguridadPerfilRolMenu from "../../pages/seguridad/SeguridadPerfilRolMenu";
+import SeguridadUsuarioPerfilRolMenu from "../../pages/seguridad/SeguridadUsuarioPerfilRolMenu";
 
 import AsistenciaPage from "../../pages/administracion/AsistenciaPage";
 import MarcacionPage from "../../pages/administracion/MarcacionPage";
@@ -187,8 +191,18 @@ export default function AppRouter() {
               element={<SeguridadPermisosPage />}
             />
             <Route path="/seguridad/SeguridadMenuPage" element={<SeguridadMenuPage />} />
+            <Route
+              path="/seguridad/SeguridadPerfilRolMenu"
+              element={<SeguridadPerfilRolMenu />}
+            />
+            <Route
+              path="/seguridad/SeguridadUsuarioPerfilRolMenu"
+              element={<SeguridadUsuarioPerfilRolMenu />}
+            />
 
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/seguridad/:autoPage" element={<AutoSecurityRoute />} />
+
+            <Route path="*" element={<DynamicMenuRoutePage />} />
           </Route>
         </Route>
       </Routes>

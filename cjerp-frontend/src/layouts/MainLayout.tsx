@@ -59,7 +59,9 @@ export default function MainLayout() {
   const collapseDirection: "left" | "right" = "left";
 
   const usuarioMostrar = (authUser?.usuario || "").toUpperCase();
-  const empleadoMostrar = (authUser?.nombre || "").toUpperCase();
+  const empleadoMostrar = (authUser?.nombre || authUser?.nombreEmpleado || "").toUpperCase();
+  const correoMostrar = (authUser?.correo || authUser?.email || "").toLowerCase();
+  const codigoEmpleadoMostrar = (authUser?.codEmp || authUser?.idEmpleado || authUser?.empleado || "").toString();
 
   useEffect(() => {
     let activo = true;
@@ -252,7 +254,17 @@ export default function MainLayout() {
               ...(isSidebarCollapsed ? styles.sidebarHeaderRowCollapsed : {}),
             }}
           >
-            {!isSidebarCollapsed && <span style={styles.sidebarHeaderTitle}>Menu</span>}
+            {!isSidebarCollapsed && (
+              <button
+                type="button"
+                style={styles.sidebarHeaderTitle}
+                onClick={irDashboard}
+                aria-label="Ir al dashboard"
+                title="Ir al dashboard"
+              >
+                Menu
+              </button>
+            )}
             <button
               type="button"
               style={styles.footerMenuButton}
@@ -340,11 +352,11 @@ export default function MainLayout() {
 
       <footer style={styles.footer}>
         <div style={styles.footerContent}>
-          <div style={styles.footerRightGroup}>
-            <div style={styles.footerUserInfoBox}>
+          <div style={{ display: "flex", width: "100%", justifyContent: "space-between", alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <div style={styles.userLabel}>Usuario: {usuarioMostrar}</div>
               <div style={styles.employeeLabel}>
-                Empleado: {empleadoMostrar || "NO DEFINIDO"}
+                Empleado: {empleadoMostrar || "NO DEFINIDO"} &nbsp;|&nbsp; Código: {codigoEmpleadoMostrar || "NO DEFINIDO"} &nbsp;|&nbsp; Correo: {correoMostrar || "NO DEFINIDO"}
               </div>
             </div>
             <button style={styles.footerLogoutButton} onClick={cerrarSesion}>
@@ -496,9 +508,13 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: 0,
   },
   sidebarHeaderTitle: {
+    border: "none",
+    background: "transparent",
+    padding: 0,
     fontSize: 13,
     fontWeight: 800,
     color: "#374151",
+    cursor: "pointer",
   },
   sidebarScrollArea: {
     height: "calc(100% - 40px)",

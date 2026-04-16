@@ -1,9 +1,15 @@
 export type AuthUser = {
   token: string;
   nombre?: string;
+  nombreEmpleado?: string;
+  empleado?: string;
   correo?: string;
+  email?: string;
   usuario?: string;
+  userName?: string;
+  username?: string;
   codEmp?: string | number;
+  idEmpleado?: string | number;
   codVal?: string | number;
   cuadrilla?: string | number;
 };
