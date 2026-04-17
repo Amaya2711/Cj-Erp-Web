@@ -144,7 +144,7 @@ public class SegMenuService : ISegMenuService
             commandType: CommandType.StoredProcedure
         );
 
-        return BuildMenusFromDynamicRows(rows);
+       return BuildMenusFromDynamicRows(rows);
     }
 
     public async Task<IEnumerable<MenuDto>> ListarPorUsuarioAsync(string idUsuario)
@@ -336,11 +336,12 @@ public class SegMenuService : ISegMenuService
 
         try
         {
-            var asignaciones = await connection.QueryAsync<(int IdRol, int IdMenu)>(
+            var asignaciones = await connection.QueryAsync<(int IdRol, int IdMenu, int Acceso)>(
                 """
                 SELECT DISTINCT
                     pr.IdRol,
-                    prm.IdMenu
+                    prm.IdMenu,
+                    prm.Acceso
                 FROM dbo.SegPerfilRol pr
                 INNER JOIN dbo.SegPerfilRolMenu prm
                     ON pr.IdPerfil = prm.IdPerfil
@@ -364,6 +365,7 @@ public class SegMenuService : ISegMenuService
                         IdPerfil = idPerfil,
                         IdRol = asignacion.IdRol,
                         IdMenu = asignacion.IdMenu,
+                        Acceso = asignacion.Acceso,
                         UsuarioCreacion = idUsuario
                     },
                     transaction: transaction,
@@ -387,8 +389,11 @@ public class SegMenuService : ISegMenuService
     {
         var menuMap = new Dictionary<int, MenuDto>();
 
-        foreach (var row in rows)
+        // Nivel 1
+        foreach (var group in rows.GroupBy(r => r.IdMenuNivel1))
         {
+            var row = group.First();
+            int acceso = row.Acceso ?? 0;
             if (row.IdMenuNivel1 > 0 && !menuMap.ContainsKey(row.IdMenuNivel1))
             {
                 menuMap[row.IdMenuNivel1] = new MenuDto
@@ -401,11 +406,19 @@ public class SegMenuService : ISegMenuService
                     OrdenMenu = row.OrdenNivel1 ?? 0,
                     NivelMenu = 0,
                     CodigoMenu = null,
-                    Acceso = row.Acceso
+                    Acceso = acceso
                 };
             }
+        }
 
-            if (row.IdMenuNivel2.HasValue && row.IdMenuNivel2.Value > 0 && !menuMap.ContainsKey(row.IdMenuNivel2.Value))
+        // Nivel 2
+        foreach (var group in rows.Where(r => r.IdMenuNivel2.HasValue).GroupBy(r => r.IdMenuNivel2.Value))
+        {
+            // Buscar la fila donde el id del menú de nivel 2 coincide exactamente
+            var row = group.FirstOrDefault(r => r.IdMenuNivel2 == r.IdMenuNivel2);
+            if (row == null) continue;
+            int acceso = row.Acceso ?? 0;
+            if (!menuMap.ContainsKey(row.IdMenuNivel2.Value))
             {
                 menuMap[row.IdMenuNivel2.Value] = new MenuDto
                 {
@@ -417,35 +430,21 @@ public class SegMenuService : ISegMenuService
                     OrdenMenu = row.OrdenNivel2 ?? 0,
                     NivelMenu = 1,
                     CodigoMenu = null,
-                    Acceso = row.Acceso
+                    Acceso = acceso
                 };
             }
-            else if (row.IdMenuNivel2.HasValue && row.IdMenuNivel2.Value > 0 && menuMap.TryGetValue(row.IdMenuNivel2.Value, out var menuNivel2Existente))
+        }
+
+        // Nivel 3
+        foreach (var group in rows.Where(r => r.IdMenuNivel3.HasValue).GroupBy(r => r.IdMenuNivel3.Value))
+        {
+            // Buscar la fila donde el id del menú de nivel 3 coincide exactamente
+            var row = group.FirstOrDefault(r => r.IdMenuNivel3 == r.IdMenuNivel3);
+            if (row == null) continue;
+            int acceso = row.Acceso ?? 0;
+            var parentId = row.IdMenuNivel2 ?? row.IdMenuNivel1;
+            if (!menuMap.ContainsKey(row.IdMenuNivel3.Value))
             {
-                var hasResolvedRoute = !string.IsNullOrWhiteSpace(menuNivel2Existente.Ruta);
-
-                if (!hasResolvedRoute &&
-                    string.IsNullOrWhiteSpace(menuNivel2Existente.NombreMenu) &&
-                    !string.IsNullOrWhiteSpace(row.MenuNivel2))
-                {
-                    menuNivel2Existente.NombreMenu = row.MenuNivel2;
-                }
-
-                menuNivel2Existente.IdMenuPadre ??= row.IdMenuNivel1;
-                menuNivel2Existente.Icono ??= row.IconoNivel2;
-                menuNivel2Existente.OrdenMenu = row.OrdenNivel2 ?? menuNivel2Existente.OrdenMenu;
-
-                if (!hasResolvedRoute)
-                    menuNivel2Existente.NivelMenu = Math.Min(menuNivel2Existente.NivelMenu, 1);
-                // Solo asignar Acceso si aún no tiene valor (evita sobrescribir con el de los hijos)
-                if (menuNivel2Existente.Acceso == null)
-                    menuNivel2Existente.Acceso = row.Acceso;
-            }
-
-            if (row.IdMenuNivel3.HasValue && row.IdMenuNivel3.Value > 0 && !menuMap.ContainsKey(row.IdMenuNivel3.Value))
-            {
-                var parentId = row.IdMenuNivel2 ?? row.IdMenuNivel1;
-
                 menuMap[row.IdMenuNivel3.Value] = new MenuDto
                 {
                     IdMenu = row.IdMenuNivel3.Value,
@@ -456,26 +455,8 @@ public class SegMenuService : ISegMenuService
                     OrdenMenu = row.OrdenNivel3 ?? 0,
                     NivelMenu = row.IdMenuNivel2.HasValue ? 2 : 1,
                     CodigoMenu = null,
-                    Acceso = row.Acceso
+                    Acceso = acceso
                 };
-            }
-            else if (row.IdMenuNivel3.HasValue && row.IdMenuNivel3.Value > 0 && menuMap.TryGetValue(row.IdMenuNivel3.Value, out var menuNivel3Existente))
-            {
-                var parentId = row.IdMenuNivel2 ?? row.IdMenuNivel1;
-
-                if (!string.IsNullOrWhiteSpace(row.MenuNivel3))
-                    menuNivel3Existente.NombreMenu = row.MenuNivel3;
-
-                if (!string.IsNullOrWhiteSpace(row.RutaNivel3))
-                    menuNivel3Existente.Ruta = row.RutaNivel3;
-
-                menuNivel3Existente.IdMenuPadre = parentId;
-                menuNivel3Existente.Icono = row.IconoNivel3 ?? menuNivel3Existente.Icono;
-                menuNivel3Existente.OrdenMenu = row.OrdenNivel3 ?? menuNivel3Existente.OrdenMenu;
-                menuNivel3Existente.NivelMenu = row.IdMenuNivel2.HasValue ? 2 : 1;
-                // Solo asignar Acceso si aún no tiene valor (evita sobrescribir con el de los hijos)
-                if (menuNivel3Existente.Acceso == null)
-                    menuNivel3Existente.Acceso = row.Acceso;
             }
         }
 

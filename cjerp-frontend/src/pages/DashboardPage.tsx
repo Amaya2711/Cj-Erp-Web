@@ -13,12 +13,7 @@ type AvisoItem = {
   detalle: string;
   tipo: "info" | "warning" | "success";
 };
-function formatFechaHora(date: Date) {
-  return new Intl.DateTimeFormat("es-PE", {
-    dateStyle: "full",
-    timeStyle: "short",
-  }).format(date);
-}
+
 
 // ...existing code...
 
@@ -49,16 +44,16 @@ function getInitials(text: string) {
 
 export default function DashboardPage() {
   const authUser = getAuthUser();
-  const [fechaHora, setFechaHora] = useState(formatFechaHora(new Date()));
+  // const [fechaHora, setFechaHora] = useState(formatFechaHora(new Date()));
   const [accesosDirectos, setAccesosDirectos] = useState<MenuAccesoDto[]>([]);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setFechaHora(formatFechaHora(new Date()));
-    }, 60000);
-
-    return () => clearInterval(timer);
-  }, []);
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setFechaHora(formatFechaHora(new Date()));
+  //   }, 60000);
+  //
+  //   return () => clearInterval(timer);
+  // }, []);
 
   useEffect(() => {
     async function cargarAccesos() {
@@ -66,26 +61,39 @@ export default function DashboardPage() {
         const usuario = getAuthUser();
         if (!usuario?.usuario) return;
         const menuRaw = await menuService.obtenerMenuDinamicoPorUsuario(usuario.usuario);
-        console.log("Respuesta cruda de menuService.obtenerMenuDinamicoPorUsuario:", menuRaw);
+        console.log("menuRaw", menuRaw);
         // Normaliza el campo 'Acceso' a 'acceso' para el frontend
-        const menu: MenuAccesoDto[] = (menuRaw as any[]).map(item => ({
-          ...item,
-          acceso: item.acceso ?? item.Acceso
-        }));
-        if (Array.isArray(menuRaw)) {
-          menuRaw.forEach((item, idx) => {
-            const accesoOriginal = (item as any)["Acceso"];
-            console.log(`MenuRaw[${idx}]: idMenu=${item.idMenu}, nombreMenu=${item.nombreMenu}, Acceso=${accesoOriginal}`);
-          });
-        }
-        if (Array.isArray(menu)) {
-          menu.forEach((item, idx) => {
-            console.log(`Menu[${idx}]: idMenu=${item.idMenu}, nombreMenu=${item.nombreMenu}, acceso=${item.acceso}`);
-          });
-        }
-        setAccesosDirectos(menu.filter(m => (m.acceso === true || m.acceso === 1) && m.nivelMenu > 0));
+        const menu: MenuAccesoDto[] = (menuRaw as any[]).map(item => {
+          // Tomar el valor de Acceso del backend, si no existe, es 0
+          let raw = typeof item.Acceso !== "undefined" ? item.Acceso : (typeof item.acceso !== "undefined" ? item.acceso : 0);
+          // Log para depuración
+          console.log(`Menu[${item.idMenu}]: nombreMenu=${item.nombreMenu}, acceso(raw)=${raw}`);
+          let accesoNum = 0;
+          if (typeof raw === "boolean") {
+            accesoNum = raw ? 1 : 0;
+          } else if (typeof raw === "string") {
+            accesoNum = raw === "1" || raw.toLowerCase() === "true" ? 1 : 0;
+          } else if (typeof raw === "number") {
+            accesoNum = raw === 1 ? 1 : 0;
+          } else {
+            accesoNum = 0;
+          }
+          return {
+            ...item,
+            acceso: accesoNum
+          };
+        });
+        console.log("menu normalizado", menu);
+        setAccesosDirectos(
+          menu.filter(m =>
+            m.acceso === 1 &&
+            m.nivelMenu > 0 &&
+            typeof m.ruta === "string" &&
+            m.ruta.trim() !== ""
+          )
+        );
       } catch (e) {
-        console.error("Error al cargar accesos:", e);
+        console.error("Error al cargar accesos :", e);
         setAccesosDirectos([]);
       }
     }
@@ -176,7 +184,7 @@ export default function DashboardPage() {
             <div style={styles.heroSubtitle}>
               Bienvenido al portal corporativo de CJ.
             </div>
-            <div style={styles.heroDate}>{fechaHora}</div>
+            {/* <div style={styles.heroDate}>{fechaHora}</div> */}
           </div>
         </div>
         <div style={styles.heroBadge}>

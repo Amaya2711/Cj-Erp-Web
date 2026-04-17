@@ -39,7 +39,7 @@ export function transformMenusToDashboard(menus: MenuDto[]): DashboardGroup[] {
   const categoryMap = new Map<number | string, MenuDto>();
   const moduleMap = new Map<number | string, MenuDto[]>();
 
-  // Separate categories from modules
+  // Separate categories from modules, filtering by acceso
   menus.forEach((menu) => {
     // Categories are nivel 0 or have no parent
     if (menu.nivelMenu === 0 || menu.idMenuPadre == null) {
@@ -131,9 +131,8 @@ export function transformMenusToDashboard(menus: MenuDto[]): DashboardGroup[] {
         return a.label.localeCompare(b.label, "es", { sensitivity: "base" });
       });
 
-    // Only add group if it has tiles (or force it anyway if NoModules)
-    // Para evitar mostrar categorías vacías, ajusta esta condición
-    if (tiles.length > 0 || true) {
+    // Only add group if it has tiles
+    if (tiles.length > 0) {
       const categoryKey = category.codigoMenu || category.nombreMenu;
       const config = getCategoryConfig(categoryKey);
       groups.push({

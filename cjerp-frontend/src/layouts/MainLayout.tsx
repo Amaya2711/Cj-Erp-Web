@@ -80,7 +80,7 @@ export default function MainLayout() {
       const grupos = await loadDashboardMenus(authUser.usuario);
 
       if (activo) {
-        setMenuDashboard(grupos.filter((grupo) => grupo.tiles.length > 0));
+        setMenuDashboard(grupos); // Mostrar todos los grupos, sin filtrar por tiles
         setMenuLoading(false);
       }
     };

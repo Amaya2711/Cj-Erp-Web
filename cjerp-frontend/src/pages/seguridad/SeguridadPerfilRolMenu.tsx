@@ -24,7 +24,7 @@ type MenuNode = {
   parentId: number | null;
   orden: number;
   children: MenuNode[];
-  acceso?: boolean;
+  acceso: number;
 };
 
 type MenuTreeItemProps = {
@@ -43,10 +43,11 @@ function buildTree(items: MenuDto[]): MenuNode[] {
   const roots: MenuNode[] = [];
 
   items.forEach((item) => {
-    // Soporta acceso: boolean | number y Acceso: number (del backend)
-    const accesoValue = (typeof (item as any).acceso !== "undefined"
-      ? (item as any).acceso
-      : (item as any).Acceso);
+    // Depuración: mostrar el item recibido y el valor de acceso
+    const rawAcceso = (item as any).acceso ?? (item as any).Acceso ?? 0;
+    console.log('[buildTree] item:', item, 'rawAcceso:', rawAcceso);
+    const accesoValue = Number(rawAcceso) === 1 ? 1 : 0;
+
     map.set(item.idMenu, {
       id: item.idMenu,
       label: item.nombreMenu,
@@ -54,7 +55,7 @@ function buildTree(items: MenuDto[]): MenuNode[] {
       parentId: item.idMenuPadre ?? null,
       orden: item.ordenMenu,
       children: [],
-      acceso: accesoValue === true || accesoValue === 1,
+      acceso: accesoValue,
     });
   });
 
@@ -180,12 +181,11 @@ function MenuTreeItem({
         <div style={styles.treeLabelBox}>
           <span style={styles.treeLabel}>
             {node.label}
-            {/* Checkbox adicional al final del nombre */}
             <input
               type="checkbox"
               style={{ marginLeft: 8 }}
               disabled={!checked || !node.path}
-              checked={!!node.acceso}
+              checked={Boolean(node.acceso)}
               onChange={e => onToggleAcceso(node, e.target.checked)}
             />
           </span>
@@ -321,6 +321,18 @@ export default function SeguridadPerfilRolMenu() {
     await cargarRolesPorPerfil(idPerfil);
   };
 
+  // Fusiona los valores de acceso de los menús asignados en el árbol base
+  function mergeAccesoToTree(nodes: MenuNode[], accesoMap: Map<number, number>): MenuNode[] {
+    return nodes.map(node => {
+      const newAcceso = accesoMap.has(node.id) ? accesoMap.get(node.id)! : 0;
+      return {
+        ...node,
+        acceso: newAcceso,
+        children: mergeAccesoToTree(node.children, accesoMap)
+      };
+    });
+  }
+
   const cargarMenuAsignado = async (nuevoPerfilId: number, nuevoRolId: number) => {
     try {
       setCargando(true);
@@ -329,6 +341,13 @@ export default function SeguridadPerfilRolMenu() {
 
       const asignados = await menuService.obtenerPorPerfilRol(nuevoPerfilId, nuevoRolId);
       const ids = new Set<number>(asignados.map((x: MenuDto) => x.idMenu));
+
+      // Crear un Map para acceso por idMenu
+      const accesoMap = new Map<number, number>();
+      asignados.forEach(x => accesoMap.set(x.idMenu, Number(x.acceso)));
+
+      // Actualizar el árbol base con los valores de acceso correctos
+      setMenuBase(prev => mergeAccesoToTree(prev, accesoMap));
 
       setSelectedIds(ids);
 
@@ -500,7 +519,7 @@ export default function SeguridadPerfilRolMenu() {
     const updateAcceso = (nodes: MenuNode[]): MenuNode[] =>
       nodes.map((node) =>
         node.id === target.id
-          ? { ...node, acceso: checked }
+          ? { ...node, acceso: checked ? 1 : 0 }
           : { ...node, children: updateAcceso(node.children) }
       );
     setMenuBase(updateAcceso(menuBase));
@@ -880,4 +899,3 @@ const styles: Record<string, React.CSSProperties> = {
   },
 };
 
-// ...existing code...

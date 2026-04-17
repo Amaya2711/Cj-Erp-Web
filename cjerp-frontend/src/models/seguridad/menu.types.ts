@@ -10,6 +10,7 @@ export interface MenuDto {
   esVisible: boolean;
   esActivo: boolean;
   esNodoPrincipal: boolean;
+  acceso: number;
 }
 
 export interface MenuNode extends MenuDto {
